@@ -1,0 +1,60 @@
+version: '3.7'
+
+services:
+  currency-exchange:
+    image: mailsonymathew/mmv2-currency-exchange-service-v2:0.0.1-SNAPSHOT
+# The memory set aside for the microservice    
+    mem_limit: 700m
+# The port on which the microservice is exposed     
+    ports:
+      - "8000:8000"
+# The network being used commonly by all microservices. This NW is defined towards the end.       
+    networks:
+      - currency-network
+# The dependency of the microservice on any other       
+    depends_on:
+      - naming-server
+# The environment configuration. Here we are specifying the eureka naming server url by replacing local host with 'naming-server' as specified below. Also the env name must be in camel case without underscores!!!      
+# Also configure zipkin url
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://naming-server:8761/eureka
+      spring.zipkin.baseUrl: http://zipkin-server:9411
+
+  currency-conversion:
+   image: mailsonymathew/mmv2-currency-conversion-service-v2:0.0.1-SNAPSHOT
+# The memory set aside for the microservice    
+   mem_limit: 700m
+# The port on which the microservice is exposed     
+   ports:
+      - "8100:8100"
+# The network being used commonly by all microservices. This NW is defined towards the end.       
+   networks:
+      - currency-network
+# The dependency of the microservice on any other       
+   depends_on:
+      - naming-server
+# The environment configuration. Here we are specifying the eureka naming server url by replacing local host with 'naming-server' as specified below. Also the env name must be in camel case without underscores!!!      
+   environment:
+      eureka.client.serviceUrl.defaultZone: http://naming-server:8761/eureka
+      spring.zipkin.baseUrl: http://zipkin-server:9411       
+            
+  naming-server:
+    image: mailsonymathew/mmv2-netflix-eureka-naming-server-v2:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network
+      
+  zipkin-server:
+    image: openzipkin/zipkin:2.23
+    mem_limit: 300m
+    ports:
+      - "9411:9411"
+    networks:
+      - currency-network
+    restart: always #Restart if there is a problem starting up            
+
+# Networks to be created to facilitate communication between containers
+networks:
+  currency-network:  

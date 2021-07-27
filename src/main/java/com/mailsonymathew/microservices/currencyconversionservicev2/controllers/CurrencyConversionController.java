@@ -31,10 +31,11 @@ public class CurrencyConversionController {
 
 	
 	// Example of old method using rest template for calling currency exchange microservice 
+	// Note : To make this path work in docker we have to specify the path as as an environment variable in teh docker-comose file. This wil not be a problem for feign as we are already using a proxy there.
 	@GetMapping("/currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
 	public CurrencyConversionBean convertCurrency(@PathVariable String from, @PathVariable String to, @PathVariable BigDecimal quantity){
 		
-		
+		logger.info("Currency conversion Value call with{} to {}",from,to);
 		
 		// the following hash map is used to provide values for placeholder elements ( i.e. form,to) in the uri 
 		Map<String,String> uriVariable = new HashMap<>();
@@ -46,7 +47,7 @@ public class CurrencyConversionController {
 		
 		CurrencyConversionBean response = responseEntity.getBody();
 		
-		logger.info("{}",response);
+
 		
 		return new CurrencyConversionBean(response.getId(),
 				                          from, to, response.getConversionMultiple(), 
